@@ -9,7 +9,7 @@
   "author": "@PONDHALF",
   "license": "ISC",
   "dependencies": {
-    "node-opus": "^0.3.2",
+    "@discordjs/opus": "^0.5.3",
     "discord.js": "^12.5.3",
     "dotenv": "^10.0.0",
     "yt-search": "^2.9.0",
