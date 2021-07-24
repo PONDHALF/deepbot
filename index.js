@@ -25,4 +25,4 @@ client.on('ready', () => {
     })
 });
 
-client.login(process.env.TOKEN);
+client.login(process.env.TOKEN2);
