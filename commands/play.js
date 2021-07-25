@@ -123,7 +123,7 @@ const skip_song = (message, server_queue) => {
             return message.channel.send("**Skipped the song!**");
         } else {
             stop_song(message, server_queue);
-            return message.channel.send("**Somethins was wrong!**");
+            return message.channel.send("**Somethings was wrong!**");
         }
     } else {
         server_queue.songs.shift();
