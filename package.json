@@ -1,5 +1,5 @@
 {
-  "name": "mydiscord",
+  "name": "test_product",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -9,6 +9,7 @@
   "author": "@PONDHALF",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.21.4",
     "discord.js": "^12.5.3",
     "dotenv": "^10.0.0",
     "minecraft-server-util": "^3.5.2",

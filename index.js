@@ -2,10 +2,6 @@ require('dotenv').config();
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
-const prefix = process.env.PREFIX;
-
-const fs = require('fs');
-
 client.commands = new Discord.Collection();
 client.events = new Discord.Collection();
 
@@ -25,4 +21,5 @@ client.on('ready', () => {
     })
 });
 
-client.login(process.env.TOKEN);
+// Token2 is token for test product discord bot
+client.login(process.env.TOKEN2);

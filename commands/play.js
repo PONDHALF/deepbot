@@ -4,9 +4,12 @@ const ytSearch = require('yt-search');
 
 const queue = new Map();
 
+var axios = require("axios").default;
+const { MessageManager } = require('discord.js');
+
 module.exports = {
     name: 'play',
-    aliases: ['p','skip', 's', 'stop', 'loop'],
+    aliases: ['p','skip', 's', 'stop', 'loop', 'lyrics'],
     cooldown: 0,
     description: 'Advance music bot',
     async execute(message, args, cmd, client, Discord) {
@@ -75,7 +78,78 @@ module.exports = {
         else if (cmd === 'loop') {
             loop(message, server_queue);
         }
+        else if (cmd == 'lyrics') {
+            perform_lyrics(message, server_queue, Discord);
+        }
     }
+
+}
+
+
+const perform_lyrics = (message, server_queue, Discord) => {
+    if (!server_queue) return message.channel.send("❌ **I am not playing any music.** Type `{prefix}play` to play music".replace("{prefix}", process.env.PREFIX));
+
+    const search = {
+        method: 'GET',
+        url: 'https://shazam.p.rapidapi.com/search',
+        headers: {
+            'x-rapidapi-host': 'shazam.p.rapidapi.com',
+            'x-rapidapi-key': '7a67c3f121msh8d08e67ac97da5cp1a9f51jsnd8b55e0bdc4c'
+        }
+    };
+
+    search.params = {term: server_queue.songs[0]['title']
+        .replace("(Official Audio)", "")
+        .replace("[Official Audio]", "")
+        .replace("(Official Video)", "")
+        .replace("[Official Video]", "")
+        .replace("(Official Music Video)", "")
+        .replace("[Official Music Video]", "")
+        .replace(" (Official Audio)", "")
+        .replace(" [Official Audio]", "")
+        .replace(" (Official Video)", "")
+        .replace(" [Official Video]", "")
+        .replace(" (Official Music Video)", "")
+        .replace(" [Official Music Video]", "")
+        .replace("(Lyrics)", "")
+        .replace("[Lyrics]", "")
+        .replace(" (Lyrics)", "")
+        .replace(" [Lyrics]", "")
+        , locale: 'en-US', offset: '0', limit: '1'};
+
+    const lyrics = {
+        method: 'GET',
+        url: 'https://shazam.p.rapidapi.com/songs/get-details',
+        headers: {
+          'x-rapidapi-host': 'shazam.p.rapidapi.com',
+          'x-rapidapi-key': '7a67c3f121msh8d08e67ac97da5cp1a9f51jsnd8b55e0bdc4c'
+        }
+    };
+
+    axios.request(search).then(function (response) {
+
+        lyrics.params = { key: response.data['tracks']['hits'][0]['track']['key'], locale: 'en-US' };
+        
+        axios.request(lyrics).then(function (res) {
+            const lyrics_embed = new Discord.MessageEmbed()
+                .setColor('#3B4281')
+                .setTitle( response.data['tracks']['hits'][0]['track']['title'])
+                .setDescription(res.data['sections'][1]['text'])
+            /*for (let i = 0; i < res.data['sections'][1]['text'].length; i++) {
+                message.channel.send(res.data['sections'][1]['text'][i]);
+            }*/
+            message.channel.send(lyrics_embed);
+        }).catch(function (err) {
+            message.channel.send("❌ **Don't have lyrics!**");
+            console.error(err);
+            return;
+        });
+
+    }).catch(function (error) {
+        message.channel.send("❌ **Don't have lyrics!**");
+        console.error(error);
+        return;
+    });
 
 }
 

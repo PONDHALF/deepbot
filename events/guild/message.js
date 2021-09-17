@@ -10,6 +10,7 @@ module.exports = (Discord, client, message) => {
     const cmd = args.shift().toLowerCase();
     
     const command = client.commands.get(cmd) || client.commands.find(a => a.aliases && a.aliases.includes(cmd));
+    if (!command) return;
     //If cooldowns map doesn't have a command.name key then create one.
     if(!cooldowns.has(command.name)){
         cooldowns.set(command.name, new Discord.Collection());
