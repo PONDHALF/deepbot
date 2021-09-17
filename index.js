@@ -22,4 +22,4 @@ client.on('ready', () => {
 });
 
 // Token2 is token for test product discord bot
-client.login(process.env.TOKEN2);
+client.login(process.env.TOKEN);
