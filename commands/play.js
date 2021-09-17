@@ -115,6 +115,8 @@ const perform_lyrics = (message, server_queue, Discord) => {
         .replace("[Lyrics]", "")
         .replace(" (Lyrics)", "")
         .replace(" [Lyrics]", "")
+        .replace("(Official MV)", "")
+        .replace(" (Official MV)", "")
         , locale: 'en-US', offset: '0', limit: '1'};
 
     const lyrics = {
