@@ -245,10 +245,10 @@ const skip_song = (message, server_queue) => {
             server_queue.connection.dispatcher.end();
             return message.channel.send("**Skipped the song!**");
         } else {
-            stop_song(message, server_queue);
+            server_queue.songs = [];
             return message.channel.send("**Somethings was wrong!**");
         }
-    } else {
+    } else {   
         server_queue.songs.shift();
         message.channel.send("**Skipped the song!**");
         video_player(message.guild, server_queue.songs[0]);
@@ -288,6 +288,8 @@ const perform_lyrics = (message, server_queue, Discord) => {
         .replace(" [Official MV]", "")
         .replace("(Official MV)", "")
         .replace(" (Official MV)", "")
+        .replace("Official MV", "")
+        .replace(" Official MV", "")
         , locale: 'en-US', offset: '0', limit: '1'};
 
     const lyrics = {
