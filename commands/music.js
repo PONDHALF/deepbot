@@ -99,8 +99,8 @@ module.exports = {
         else if (cmd === 'stop') {
             if (!message.member.voice.channel) return message.channel.send('You need to be in a channel to execute this command!');
             if (!server_queue || !server_queue.songs) return message.channel.send("❌ **I am not playing any music.** Type `{prefix}play` to play music".replace("{prefix}", process.env.PREFIX));
-            server_queue.songs = [];
-            server_queue.connection.dispatcher.end();
+            server_queue.voice_channel.leave();
+            queue.delete(message.guild.id);
             return message.channel.send("**Stopped!**");
         }
         else if (cmd === 'loop') {
@@ -246,7 +246,8 @@ const skip_song = (message, server_queue) => {
             server_queue.connection.dispatcher.end();
             return message.channel.send("**Skipped the song!**");
         } else {
-            server_queue.songs = [];
+            server_queue.voice_channel.leave();
+            queue.delete(message.guild.id);
             return message.channel.send("**Somethings was wrong!**");
         }
     } else {   
