@@ -276,11 +276,13 @@ const video_player = async (guild, song) => {
     if (!song) {
         queue.delete(guild.id);
         setTimeout(function() {
-            if (song) {
+            let now_song = queue.get(guild.id);
+            if (!(now_song)) {
                 song_queue.voice_channel.leave();
                 return;
+            } else {
+                return;
             }
-            return;
         }, 1000 * 60);
         return;
     }
