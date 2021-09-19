@@ -190,7 +190,16 @@ module.exports = {
                         if (page === 1) return;
                         page--;
                         embed.setDescription(pages[page-1]);
-                        embed.setFooter(`Page ${page} of ${pages.length}`);
+                        if (server_queue.loop === false && server_queue.loopqueue === false) {
+                            embed.setFooter(`Page ${page}/${pages.length} | Loop: ❌ | Queue Loop: ❌`);
+                        } 
+                        else if (server_queue.loop === true && server_queue.loopqueue === false) {
+                            embed.setFooter(`Page ${page}/${pages.length} | Loop: ✅ | Queue Loop: ❌`);
+                        }
+                        else if (server_queue.loop === false && server_queue.loopqueue === true) {
+                            embed.setFooter(`Page ${page}/${pages.length} | Loop: ❌ | Queue Loop: ✅`);
+                        }
+
                         msg.edit(embed);
                     })
         
@@ -198,7 +207,15 @@ module.exports = {
                         if (page === pages.length) return;
                         page++;
                         embed.setDescription(pages[page-1]);
-                        embed.setFooter(`Page ${page} of ${pages.length}`);
+                        if (server_queue.loop === false && server_queue.loopqueue === false) {
+                            embed.setFooter(`Page ${page}/${pages.length} | Loop: ❌ | Queue Loop: ❌`);
+                        } 
+                        else if (server_queue.loop === true && server_queue.loopqueue === false) {
+                            embed.setFooter(`Page ${page}/${pages.length} | Loop: ✅ | Queue Loop: ❌`);
+                        }
+                        else if (server_queue.loop === false && server_queue.loopqueue === true) {
+                            embed.setFooter(`Page ${page}/${pages.length} | Loop: ❌ | Queue Loop: ✅`);
+                        }
                         msg.edit(embed);
                     })
                 })
