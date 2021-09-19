@@ -273,12 +273,14 @@ const loopqueue = (message, server_queue) => {
 const video_player = async (guild, song) => {
     const song_queue = queue.get(guild.id);
 
-    if (!song) {
+    if (!song) { 
         setTimeout(function() {
-            song_queue.voice_channel.leave();
-            queue.delete(guild.id);
+            if (!song) {
+                song_queue.voice_channel.leave();
+                queue.delete(guild.id);
+                return;
+            }
         }, 1000 * 60);
-        return;
     }
 
     const stream = ytdl(song.url, { filter: 'audioonly' });
