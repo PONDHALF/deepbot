@@ -11,7 +11,7 @@ var axios = require("axios").default;
 
 module.exports = {
     name: 'play',
-    aliases: ['p','skip', 's', 'stop', 'loop', 'lyrics', 'queue', 'remove'],
+    aliases: ['p','skip', 's', 'stop', 'loop', 'lyrics', 'queue', 'remove', 'loopqueue'],
     cooldown: 0,
     description: 'Advance music bot',
     async execute(message, args, cmd, client, Discord) {
@@ -59,6 +59,7 @@ module.exports = {
                     voice_channel: voice_channel,
                     text_channel: message.channel,
                     loop: false,
+                    loopqueue: false,
                     connection: null,
                     songs: []
                 }
@@ -106,6 +107,9 @@ module.exports = {
         else if (cmd === 'loop') {
             loop(message, server_queue);
         }
+        else if (cmd === 'loopqueue') {
+            loopqueue(message, server_queue);
+        }
         else if (cmd == 'lyrics') {
             perform_lyrics(message, server_queue, Discord);
         }
@@ -145,12 +149,31 @@ module.exports = {
                     break;
                 }
             }
-        
-            const embed = new Discord.MessageEmbed()
-                .setTitle("**Queue Songs**")
-                .setColor(0xffffff)
-                .setFooter(`**Page ${page} of ${pages.length}**`)
-                .setDescription(pages[page-1])
+            // ❌ ✅
+            let embed;
+
+            if (server_queue.loop === false
+            && server_queue.loopqueue === false) {
+                embed = new Discord.MessageEmbed()
+                    .setTitle("**Queue Songs**")
+                    .setColor(0xffffff)
+                    .setFooter(`Page ${page}/${pages.length} | Loop: ❌ | Queue Loop: ❌`)
+                    .setDescription(pages[page-1])
+            }
+            else if (server_queue.loop === true && server_queue.loopqueue === false) {
+                embed = new Discord.MessageEmbed()
+                    .setTitle("**Queue Songs**")
+                    .setColor(0xffffff)
+                    .setFooter(`Page ${page}/${pages.length} | Loop: ✅ | Queue Loop: ❌`)
+                    .setDescription(pages[page-1])
+            }
+            else if (server_queue.loop === false && server_queue.loopqueue === true) {
+                embed = new Discord.MessageEmbed()
+                    .setTitle("**Queue Songs**")
+                    .setColor(0xffffff)
+                    .setFooter(`Page ${page}/${pages.length} | Loop: ❌ | Queue Loop: ✅`)
+                    .setDescription(pages[page-1])
+            }
             
             message.channel.send(embed).then(msg => {
                 msg.react('⏪').then(r => {
@@ -207,30 +230,54 @@ const loop = (message, server_queue) => {
     if (!server_queue) return message.channel.send("❌ **I am not playing any music.** Type `{prefix}play` to play music".replace("{prefix}", process.env.PREFIX));
     if (server_queue.loop === false) {
         server_queue.loop = true;
+        server_queue.loopqueue = false;
         return message.channel.send("**🔂 Enabled!**");
     } else {
         server_queue.loop = false;
+        server_queue.loopqueue = false;
         return message.channel.send("**🔂 Disabled!**");
     }
+}
+
+const loopqueue = (message, server_queue) => {
+    if (!server_queue) return message.channel.send("❌ **I am not playing any music.** Type `{prefix}play` to play music".replace("{prefix}", process.env.PREFIX));
+    if (server_queue.songs.length <= 1) return message.channel.send("❌ **Add song to queue!** I need more songs to loop queue"); 
+    if (server_queue.loopqueue === false) {
+        server_queue.loopqueue = true;
+        server_queue.loop = false;
+        return message.channel.send("**🔂 Queue Enabled!**");
+    } else {
+        server_queue.loopqueue = false;
+        server_queue.loop = false;
+        return message.channel.send("**🔂 Queue Disabled!**");
+    } 
 }
 
 const video_player = async (guild, song) => {
     const song_queue = queue.get(guild.id);
 
     if (!song) {
-        song_queue.voice_channel.leave();
-        queue.delete(guild.id);
+        setTimeout(function() {
+            song_queue.voice_channel.leave();
+            queue.delete(guild.id);
+        }, 1000 * 60);
         return;
     }
 
     const stream = ytdl(song.url, { filter: 'audioonly' });
     song_queue.connection.play(stream, { seek: 0, volume: 0.5 })
     .on('finish', () => {
-        if (song_queue.loop === false) {
+        if (song_queue.loop === false && song_queue.loopqueue === false) {
             song_queue.songs.shift();
             video_player(guild, song_queue.songs[0]);
         } else {
-            video_player(guild, song_queue.songs[0]);
+            if (song_queue.loop === true) {
+                video_player(guild, song_queue.songs[0]);
+            }
+            if (song_queue.loopqueue === true) {
+                song_queue.songs.push(song_queue.songs.shift());
+                video_player(guild, song_queue.songs[0]);
+            }
         }
     });
     await song_queue.text_channel.send("📣 Now playing **`${song.title}`**".replace("${song.title}", `${song.title}`))
@@ -241,7 +288,7 @@ const skip_song = (message, server_queue) => {
     if (!server_queue) {
         return message.channel.send(`**There are no songs in queue** 😔`)
     }
-    if (server_queue.loop === false) {
+    if (server_queue.loop === false && server_queue.loop_queue === false) {
         if (server_queue.connection.dispatcher !== null) {
             server_queue.connection.dispatcher.end();
             return message.channel.send("**Skipped the song!**");
@@ -250,8 +297,14 @@ const skip_song = (message, server_queue) => {
             queue.delete(message.guild.id);
             return message.channel.send("**Somethings was wrong!**");
         }
-    } else {   
+    } 
+    else if (server_queue.loop === true) {   
         server_queue.songs.shift();
+        message.channel.send("**Skipped the song!**");
+        video_player(message.guild, server_queue.songs[0]);
+    }
+    else if (server_queue.loopqueue === true) {
+        server_queue.songs.push(server_queue.songs.shift());
         message.channel.send("**Skipped the song!**");
         video_player(message.guild, server_queue.songs[0]);
     }
