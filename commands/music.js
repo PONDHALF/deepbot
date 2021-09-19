@@ -311,7 +311,7 @@ const skip_song = (message, server_queue) => {
     if (!server_queue) {
         return message.channel.send(`**There are no songs in queue** 😔`)
     }
-    if (server_queue.loop === false && server_queue.loop_queue === false) {
+    if (server_queue.loop === false && server_queue.loopqueue === false) {
         if (server_queue.connection.dispatcher !== null) {
             server_queue.connection.dispatcher.end();
             return message.channel.send("**Skipped the song!**");
