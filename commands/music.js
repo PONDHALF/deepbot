@@ -112,9 +112,9 @@ module.exports = {
             skip_song(message, server_queue);
         }
         else if (cmd === 'stop') {
-            if (!IsSameChannel) return message.channel.send("❌ **You aren't connected to the same voice channel as I am.**");
             if (!message.member.voice.channel) return message.channel.send('You need to be in a channel to execute this command!');
             if (!server_queue || !server_queue.songs) return message.channel.send("❌ **I am not playing any music.** Type `{prefix}play` to play music".replace("{prefix}", process.env.PREFIX));
+            if (!IsSameChannel) return message.channel.send("❌ **You aren't connected to the same voice channel as I am.**");
             server_queue.connection.dispatcher.end();
             server_queue.voice_channel.leave();
             queue.delete(message.guild.id);
@@ -133,8 +133,8 @@ module.exports = {
             perform_lyrics(message, server_queue, Discord);
         }
         else if (cmd === 'remove') {
-            if (!IsSameChannel) return message.channel.send("❌ **You aren't connected to the same voice channel as I am.**");
             if (!server_queue) return message.channel.send("❌ **I am not playing any music.** Type `{prefix}play` to play music".replace("{prefix}", process.env.PREFIX));
+            if (!IsSameChannel) return message.channel.send("❌ **You aren't connected to the same voice channel as I am.**");
             if (!args.length) return message.channel.send('❌ Type: `{prefix}remove [index / indices]`\n✅ Example: `{prefix}remove 1`'.replace("{prefix}", process.env.PREFIX).replace("{prefix}", process.env.PREFIX));
             if (isNaN(args[0])) message.channel.send('❌ Type: `{prefix}remove [index / indices]`\n✅ Example: `{prefix}remove 1`'.replace("{prefix}", process.env.PREFIX).replace("{prefix}", process.env.PREFIX));
             remove(message, server_queue, parseInt(args[0]));
