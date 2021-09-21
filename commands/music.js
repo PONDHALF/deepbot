@@ -9,6 +9,8 @@ const queue = new Map();
 
 var axios = require("axios").default;
 
+var init = 0;
+
 module.exports = {
     name: 'play',
     aliases: ['p','skip', 's', 'stop', 'loop', 'lyrics', 'queue', 'remove', 'loopqueue'],
@@ -26,15 +28,18 @@ module.exports = {
 
         const server_queue = queue.get(message.guild.id);
         
-        client.on('voiceStateUpdate', (state) => {
-
-            if (state.member.id === client.user.id) {
-                if (!state.member.voice.channel) {
-                    
-                    queue.delete(message.guild.id);
-                } 
-            }
-        }); 
+        if (init === 0) {
+            init += 1;
+            client.on('voiceStateUpdate', (state) => {
+                if (state.member.id === client.user.id) {
+                    if (!state.member.voice.channel) {               
+                        queue.delete(message.guild.id);
+                        message.channel.send("👋 **Good bye**");
+                        return;
+                    } 
+                }
+            });
+        }
 
         if (cmd === 'play' || cmd === 'p') {
             if (!args.length) return message.channel.send('You need to send the second argument');
@@ -115,9 +120,7 @@ module.exports = {
             if (!message.member.voice.channel) return message.channel.send('You need to be in a channel to execute this command!');
             if (!server_queue || !server_queue.songs) return message.channel.send("❌ **I am not playing any music.** Type `{prefix}play` to play music".replace("{prefix}", process.env.PREFIX));
             if (!IsSameChannel) return message.channel.send("❌ **You aren't connected to the same voice channel as I am.**");
-            server_queue.connection.dispatcher.end();
             server_queue.voice_channel.leave();
-            queue.delete(message.guild.id);
             return message.channel.send("**Stopped!**");
         }
         else if (cmd === 'loop') {
@@ -323,10 +326,6 @@ const video_player = async (guild, song) => {
             }
         }
     });
-    song_queue.connection.on('disconnect', () => {
-        song_queue.text_channel.send("👋 **Good bye**");
-        queue.delete(guild.id);
-    })
     await song_queue.text_channel.send("📣 Now playing **`${song.title}`**".replace("${song.title}", `${song.title}`))
 }
 
