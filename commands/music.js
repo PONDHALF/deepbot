@@ -16,12 +16,25 @@ module.exports = {
     description: 'Advance music bot',
     async execute(message, args, cmd, client, Discord) {
         const voice_channel = message.member.voice.channel;
+        const IsSameChannel = client.voice.connections.some(
+            (connection) => connection.channel.id === voice_channel.id
+        )
         if (!voice_channel) return message.channel.send('You need to be in a channel to execute this command!');
         const permissions = voice_channel.permissionsFor(message.client.user);
         if (!permissions.has('CONNECT')) return message.channel.send('You dont have the correct permissions');
         if (!permissions.has('SPEAK')) return message.channel.send('You dont have the correct permissions');
 
         const server_queue = queue.get(message.guild.id);
+        
+        client.on('voiceStateUpdate', (state) => {
+
+            if (state.member.id === client.user.id) {
+                if (!state.member.voice.channel) {
+                    
+                    queue.delete(message.guild.id);
+                } 
+            }
+        }); 
 
         if (cmd === 'play' || cmd === 'p') {
             if (!args.length) return message.channel.send('You need to send the second argument');
@@ -95,25 +108,32 @@ module.exports = {
         }
 
         else if (cmd === 'skip' || cmd === 's') {
+            if (!IsSameChannel) return message.channel.send("❌ **You aren't connected to the same voice channel as I am.**");
             skip_song(message, server_queue);
         }
         else if (cmd === 'stop') {
+            if (!IsSameChannel) return message.channel.send("❌ **You aren't connected to the same voice channel as I am.**");
             if (!message.member.voice.channel) return message.channel.send('You need to be in a channel to execute this command!');
             if (!server_queue || !server_queue.songs) return message.channel.send("❌ **I am not playing any music.** Type `{prefix}play` to play music".replace("{prefix}", process.env.PREFIX));
+            server_queue.connection.dispatcher.end();
             server_queue.voice_channel.leave();
             queue.delete(message.guild.id);
             return message.channel.send("**Stopped!**");
         }
         else if (cmd === 'loop') {
+            if (!IsSameChannel) return message.channel.send("❌ **You aren't connected to the same voice channel as I am.**");
             loop(message, server_queue);
         }
         else if (cmd === 'loopqueue') {
+            if (!IsSameChannel) return message.channel.send("❌ **You aren't connected to the same voice channel as I am.**");
             loopqueue(message, server_queue);
         }
         else if (cmd == 'lyrics') {
+            if (!IsSameChannel) return message.channel.send("❌ **You aren't connected to the same voice channel as I am.**");
             perform_lyrics(message, server_queue, Discord);
         }
         else if (cmd === 'remove') {
+            if (!IsSameChannel) return message.channel.send("❌ **You aren't connected to the same voice channel as I am.**");
             if (!server_queue) return message.channel.send("❌ **I am not playing any music.** Type `{prefix}play` to play music".replace("{prefix}", process.env.PREFIX));
             if (!args.length) return message.channel.send('❌ Type: `{prefix}remove [index / indices]`\n✅ Example: `{prefix}remove 1`'.replace("{prefix}", process.env.PREFIX).replace("{prefix}", process.env.PREFIX));
             if (isNaN(args[0])) message.channel.send('❌ Type: `{prefix}remove [index / indices]`\n✅ Example: `{prefix}remove 1`'.replace("{prefix}", process.env.PREFIX).replace("{prefix}", process.env.PREFIX));
@@ -303,6 +323,10 @@ const video_player = async (guild, song) => {
             }
         }
     });
+    song_queue.connection.on('disconnect', () => {
+        song_queue.text_channel.send("👋 **Good bye**");
+        queue.delete(guild.id);
+    })
     await song_queue.text_channel.send("📣 Now playing **`${song.title}`**".replace("${song.title}", `${song.title}`))
 }
 
