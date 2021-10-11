@@ -32,10 +32,9 @@ module.exports = {
             init += 1;
             client.on('voiceStateUpdate', (state) => {
                 if (state.member.id === client.user.id) {
-                    if (!state.member.voice.channel) {               
-                        queue.delete(message.guild.id);
-                        message.channel.send("👋 **Good bye**");
-                        return;
+                    if (!state.member.voice.channel) {
+                      queue.delete(message.guild.id);
+                      return;
                     } 
                 }
             });
@@ -118,7 +117,7 @@ module.exports = {
         }
         else if (cmd === 'stop') {
             if (!message.member.voice.channel) return message.channel.send('You need to be in a channel to execute this command!');
-            if (!server_queue || !server_queue.songs) return message.channel.send("❌ **I am not playing any music.** Type `{prefix}play` to play music".replace("{prefix}", process.env.PREFIX));
+            if (!server_queue || !server_queue.songs) return message.channel.send("❌ **I am not playing any music.** Type `{prefix}play` to play music".replace("{prefix}", process.env['PREFIX']));
             if (!IsSameChannel) return message.channel.send("❌ **You aren't connected to the same voice channel as I am.**");
             server_queue.voice_channel.leave();
             return message.channel.send("**Stopped!**");
@@ -136,14 +135,14 @@ module.exports = {
             perform_lyrics(message, server_queue, Discord);
         }
         else if (cmd === 'remove') {
-            if (!server_queue) return message.channel.send("❌ **I am not playing any music.** Type `{prefix}play` to play music".replace("{prefix}", process.env.PREFIX));
+            if (!server_queue) return message.channel.send("❌ **I am not playing any music.** Type `{prefix}play` to play music".replace("{prefix}", process.env['PREFIX']));
             if (!IsSameChannel) return message.channel.send("❌ **You aren't connected to the same voice channel as I am.**");
-            if (!args.length) return message.channel.send('❌ Type: `{prefix}remove [index / indices]`\n✅ Example: `{prefix}remove 1`'.replace("{prefix}", process.env.PREFIX).replace("{prefix}", process.env.PREFIX));
-            if (isNaN(args[0])) message.channel.send('❌ Type: `{prefix}remove [index / indices]`\n✅ Example: `{prefix}remove 1`'.replace("{prefix}", process.env.PREFIX).replace("{prefix}", process.env.PREFIX));
+            if (!args.length) return message.channel.send('❌ Type: `{prefix}remove [index / indices]`\n✅ Example: `{prefix}remove 1`'.replace("{prefix}", process.env['PREFIX']).replace("{prefix}", process.env['PREFIX']));
+            if (isNaN(args[0])) message.channel.send('❌ Type: `{prefix}remove [index / indices]`\n✅ Example: `{prefix}remove 1`'.replace("{prefix}", process.env['PREFIX']).replace("{prefix}", process.env['PREFIX']));
             remove(message, server_queue, parseInt(args[0]));
         }
         else if (cmd === 'queue') {
-            if (!server_queue) return message.channel.send("❌ **I am not playing any music.** Type `{prefix}play` to play music".replace("{prefix}", process.env.PREFIX));
+            if (!server_queue) return message.channel.send("❌ **I am not playing any music.** Type `{prefix}play` to play music".replace("{prefix}", process.env['PREFIX']));
             let pages = [];
             let page = 1;
             let songs_page = [];
@@ -267,7 +266,7 @@ const remove = (message, server_queue, arg) => {
 }
 
 const loop = (message, server_queue) => {
-    if (!server_queue) return message.channel.send("❌ **I am not playing any music.** Type `{prefix}play` to play music".replace("{prefix}", process.env.PREFIX));
+    if (!server_queue) return message.channel.send("❌ **I am not playing any music.** Type `{prefix}play` to play music".replace("{prefix}", process.env['PREFIX']));
     if (server_queue.loop === false) {
         server_queue.loop = true;
         server_queue.loopqueue = false;
@@ -280,7 +279,7 @@ const loop = (message, server_queue) => {
 }
 
 const loopqueue = (message, server_queue) => {
-    if (!server_queue) return message.channel.send("❌ **I am not playing any music.** Type `{prefix}play` to play music".replace("{prefix}", process.env.PREFIX));
+    if (!server_queue) return message.channel.send("❌ **I am not playing any music.** Type `{prefix}play` to play music".replace("{prefix}", process.env['PREFIX']));
     if (server_queue.songs.length <= 1) return message.channel.send("❌ **Add song to queue!** I need more songs to loop queue"); 
     if (server_queue.loopqueue === false) {
         server_queue.loopqueue = true;
@@ -357,7 +356,7 @@ const skip_song = (message, server_queue) => {
 }
 
 const perform_lyrics = (message, server_queue, Discord) => {
-    if (!server_queue) return message.channel.send("❌ **I am not playing any music.** Type `{prefix}play` to play music".replace("{prefix}", process.env.PREFIX));
+    if (!server_queue) return message.channel.send("❌ **I am not playing any music.** Type `{prefix}play` to play music".replace("{prefix}", process.env['PREFIX']));
 
     const search = {
         method: 'GET',
